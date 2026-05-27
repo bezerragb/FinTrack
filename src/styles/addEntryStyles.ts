@@ -88,6 +88,33 @@ export const styles = StyleSheet.create({
     color: '#111827',
   },
 
+  pickerContainer: {
+    backgroundColor: '#F3F4F6',
+
+    borderRadius: 12,
+
+    overflow: 'hidden',
+
+    justifyContent: 'center',
+
+    height: 58,
+
+    paddingHorizontal: 10,
+  },
+
+  picker: {
+    width: '100%',
+    height: 58,
+
+    backgroundColor: '#F3F4F6',
+
+    color: '#111827',
+
+    borderWidth: 0,
+
+    outlineWidth: 0,
+  },
+
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -115,7 +142,7 @@ export const styles = StyleSheet.create({
   addButton: {
     flex: 1,
 
-    backgroundColor: '#FF0000',
+    backgroundColor: '#fd0000',
 
     borderRadius: 12,
 
@@ -137,14 +164,5 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  pickerContainer: {
-
-  backgroundColor: '#F3F4F6',
-
-  borderRadius: 12,
-
-  overflow: 'hidden',
-
-},
 
 });
