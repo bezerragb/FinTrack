@@ -6,13 +6,16 @@ import {
   ScrollView,
 } from 'react-native';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useFinanceStore } from '../store/useFinanceStore';
 
 import { styles } from '../styles/addEntryStyles';
 
 import { Picker } from '@react-native-picker/picker';
+
+import { useCategoryStore } from '../store/useCategoryStore';
+
 
 export default function AddEntry({ navigation }: any) {
 
@@ -24,15 +27,41 @@ export default function AddEntry({ navigation }: any) {
 
   const [title, setTitle] = useState('');
 
-  const [category, setCategory] = useState('Alimentação');
+  const [category, setCategory] = useState('');
   
   const addEntry = useFinanceStore(
     (state) => state.addEntry
   );
 
+  const categories = useCategoryStore(
+  (state) => state.categories
+);
+
+  const loadCategories = useCategoryStore(
+  (state) => state.loadCategories
+);
+
+  useEffect(() => {
+
+  async function fetchCategories() {
+
+    await loadCategories();
+
+    const currentCategories =
+      useCategoryStore.getState().categories;
+
+    if (currentCategories.length > 0) {
+      setCategory(currentCategories[0].name);
+    }
+  }
+
+  fetchCategories();
+
+}, []);
+
   async function handleAdd() {
 
-    if (!amount || !title) return;
+    if (!amount || !title || !category) return;
 
     await addEntry({
       id: String(Date.now()),
@@ -42,6 +71,11 @@ export default function AddEntry({ navigation }: any) {
       category,
       date: new Date().toISOString(),
     });
+
+    setAmount('');
+    setTitle('');
+    setCategory('');
+    setType('expense');
 
     navigation.goBack();
   }
@@ -143,32 +177,20 @@ export default function AddEntry({ navigation }: any) {
 <View style={styles.pickerContainer}>
 
   <Picker
-    selectedValue={category}
-    onValueChange={(itemValue) =>
-      setCategory(itemValue)
-    }
-  >
-
+  style={styles.picker}
+  selectedValue={category}
+  onValueChange={(itemValue) =>
+    setCategory(itemValue)
+  }
+>
+    
+    {categories.map((item) => (
     <Picker.Item
-      label="Alimentação"
-      value="Alimentação"
+      key={item.id}
+      label={item.name}
+      value={item.name}
     />
-
-    <Picker.Item
-      label="Transporte"
-      value="Transporte"
-    />
-
-    <Picker.Item
-      label="Lazer"
-      value="Lazer"
-    />
-
-    <Picker.Item
-      label="Salário"
-      value="Salário"
-    />
-
+))}
   </Picker>
 
 </View>
