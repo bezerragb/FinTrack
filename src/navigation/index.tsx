@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Home from '../screens/Home';
 import AddEntry from '../screens/AddEntry';
 import Tags from '../screens/Tags';
+import Reports from '../screens/Reports';
 
 const Tab = createBottomTabNavigator();
 
@@ -32,27 +33,43 @@ export default function Routes() {
             backgroundColor: '#FFFFFF',
           },
 
-          tabBarIcon: ({ focused, size }) => {
+          tabBarIcon: ({ focused }) => {
 
             let iconName: any;
 
             if (route.name === 'Home') {
-              iconName = focused ? 'home' : 'home-outline';
+              iconName = focused
+                ? 'home'
+                : 'home-outline';
             }
 
             else if (route.name === 'Adicionar') {
-              iconName = focused ? 'add-circle' : 'add-circle-outline';
+              iconName = focused
+                ? 'add-circle'
+                : 'add-circle-outline';
             }
 
             else if (route.name === 'Tags') {
-              iconName = focused ? 'pricetag' : 'pricetag-outline';
+              iconName = focused
+                ? 'pricetag'
+                : 'pricetag-outline';
+            }
+
+            else if (route.name === 'Relatórios') {
+              iconName = focused
+                ? 'pie-chart'
+                : 'pie-chart-outline';
             }
 
             return (
               <Ionicons
                 name={iconName}
                 size={30}
-                color={focused ? '#00D95F' : '#94A3B8'}
+                color={
+                  focused
+                    ? '#00D95F'
+                    : '#94A3B8'
+                }
               />
             );
           },
@@ -68,6 +85,11 @@ export default function Routes() {
         <Tab.Screen
           name="Adicionar"
           component={AddEntry}
+        />
+
+        <Tab.Screen
+          name="Relatórios"
+          component={Reports}
         />
 
         <Tab.Screen
