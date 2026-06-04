@@ -6,7 +6,10 @@ import {
   Dimensions,
 } from 'react-native';
 
-import { useEffect } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 
 import { PieChart } from 'react-native-chart-kit';
 
@@ -34,6 +37,13 @@ export default function Reports() {
     (state) => state.loadCategories
   );
 
+  const [selectedDate, setSelectedDate] =
+    useState(new Date());
+
+  const [viewMode, setViewMode] = useState<
+    'monthly' | 'yearly'
+  >('monthly');
+
   useEffect(() => {
 
     loadEntries();
@@ -42,11 +52,94 @@ export default function Reports() {
 
   }, []);
 
-  // GASTOS
+  function previousPeriod() {
 
-  const expenseEntries = entries.filter(
-    (item) => item.type === 'expense'
+    setSelectedDate((current) => {
+
+      const date = new Date(current);
+
+      if (viewMode === 'monthly') {
+
+        date.setMonth(
+          date.getMonth() - 1
+        );
+
+      } else {
+
+        date.setFullYear(
+          date.getFullYear() - 1
+        );
+
+      }
+
+      return date;
+
+    });
+
+  }
+
+  function nextPeriod() {
+
+    setSelectedDate((current) => {
+
+      const date = new Date(current);
+
+      if (viewMode === 'monthly') {
+
+        date.setMonth(
+          date.getMonth() + 1
+        );
+
+      } else {
+
+        date.setFullYear(
+          date.getFullYear() + 1
+        );
+
+      }
+
+      return date;
+
+    });
+
+  }
+
+  const filteredEntries = entries.filter(
+    (entry) => {
+
+      const entryDate =
+        new Date(entry.date);
+
+      if (viewMode === 'monthly') {
+
+        return (
+          entryDate.getMonth() ===
+            selectedDate.getMonth() &&
+          entryDate.getFullYear() ===
+            selectedDate.getFullYear()
+        );
+
+      }
+
+      return (
+        entryDate.getFullYear() ===
+        selectedDate.getFullYear()
+      );
+
+    }
   );
+
+  const expenseEntries =
+    filteredEntries.filter(
+      (item) =>
+        item.type === 'expense'
+    );
+
+  const incomeEntries =
+    filteredEntries.filter(
+      (item) =>
+        item.type === 'income'
+    );
 
   const groupedExpenses = categories
     .map((category) => {
@@ -54,7 +147,8 @@ export default function Reports() {
       const total = expenseEntries
         .filter(
           (entry) =>
-            entry.category === category.name
+            entry.category ===
+            category.name
         )
         .reduce(
           (sum, entry) =>
@@ -70,13 +164,10 @@ export default function Reports() {
         legendFontSize: 12,
       };
     })
-    .filter((item) => item.population > 0);
-
-  // GANHOS
-
-  const incomeEntries = entries.filter(
-    (item) => item.type === 'income'
-  );
+    .filter(
+      (item) =>
+        item.population > 0
+    );
 
   const groupedIncomes = categories
     .map((category) => {
@@ -84,7 +175,8 @@ export default function Reports() {
       const total = incomeEntries
         .filter(
           (entry) =>
-            entry.category === category.name
+            entry.category ===
+            category.name
         )
         .reduce(
           (sum, entry) =>
@@ -100,67 +192,114 @@ export default function Reports() {
         legendFontSize: 12,
       };
     })
-    .filter((item) => item.population > 0);
+    .filter(
+      (item) =>
+        item.population > 0
+    );
+
+  const periodLabel =
+    viewMode === 'monthly'
+      ? selectedDate.toLocaleDateString(
+          'pt-BR',
+          {
+            month: 'long',
+            year: 'numeric',
+          }
+        )
+      : String(
+          selectedDate.getFullYear()
+        );
 
   return (
 
     <ScrollView
       style={styles.container}
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={
+        false
+      }
     >
 
       <Text style={styles.title}>
         Relatórios
       </Text>
 
-      {/* SWITCH */}
-
       <View style={styles.switchContainer}>
 
         <TouchableOpacity
           style={[
             styles.switchButton,
-            styles.switchActive,
+
+            viewMode ===
+              'monthly' &&
+              styles.switchActive,
           ]}
+          onPress={() =>
+            setViewMode(
+              'monthly'
+            )
+          }
         >
-          <Text style={styles.switchText}>
+
+          <Text
+            style={
+              styles.switchText
+            }
+          >
             Mensal
           </Text>
+
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.switchButton}
+          style={[
+            styles.switchButton,
+
+            viewMode ===
+              'yearly' &&
+              styles.switchActive,
+          ]}
+          onPress={() =>
+            setViewMode(
+              'yearly'
+            )
+          }
         >
-          <Text style={styles.switchText}>
+
+          <Text
+            style={
+              styles.switchText
+            }
+          >
             Anual
           </Text>
+
         </TouchableOpacity>
 
       </View>
-
-      {/* HEADER MÊS */}
 
       <View style={styles.monthContainer}>
 
         <TouchableOpacity
           style={styles.arrowButton}
+          onPress={
+            previousPeriod
+          }
         >
           <Text>←</Text>
         </TouchableOpacity>
 
         <Text style={styles.monthText}>
-          Maio De 2026
+          {periodLabel}
         </Text>
 
         <TouchableOpacity
           style={styles.arrowButton}
+          onPress={nextPeriod}
         >
           <Text>→</Text>
         </TouchableOpacity>
 
       </View>
-
-      {/* GASTOS */}
 
       <View style={styles.reportCard}>
 
@@ -170,28 +309,40 @@ export default function Reports() {
 
         {groupedExpenses.length > 0 ? (
 
-        <PieChart
-          data={groupedExpenses}
-          width={
-            Dimensions.get('window').width - 85
-          }
-          height={200}
-          accessor="population"
-          backgroundColor="transparent"
-          paddingLeft="15"
-          absolute
-          hasLegend={true}
-          chartConfig={{
-            color: () => '#000',
-          }}
-        />
+          <PieChart
+            data={groupedExpenses}
+            width={
+              Dimensions.get(
+                'window'
+              ).width - 85
+            }
+            height={200}
+            accessor="population"
+            backgroundColor="transparent"
+            paddingLeft="15"
+            absolute
+            hasLegend={true}
+            chartConfig={{
+              color: () =>
+                '#000',
+            }}
+          />
 
         ) : (
 
-          <View style={styles.emptyContainer}>
+          <View
+            style={
+              styles.emptyContainer
+            }
+          >
 
-            <Text style={styles.emptyText}>
-              Nenhum gasto neste período
+            <Text
+              style={
+                styles.emptyText
+              }
+            >
+              Nenhum gasto neste
+              período
             </Text>
 
           </View>
@@ -199,8 +350,6 @@ export default function Reports() {
         )}
 
       </View>
-
-      {/* GANHOS */}
 
       <View style={styles.reportCard}>
 
@@ -213,24 +362,37 @@ export default function Reports() {
           <PieChart
             data={groupedIncomes}
             width={
-              Dimensions.get('window').width - 85
+              Dimensions.get(
+                'window'
+              ).width - 85
             }
             height={200}
             accessor="population"
             backgroundColor="transparent"
             paddingLeft="15"
             absolute
+            hasLegend={true}
             chartConfig={{
-              color: () => '#000',
+              color: () =>
+                '#000',
             }}
           />
 
         ) : (
 
-          <View style={styles.emptyContainer}>
+          <View
+            style={
+              styles.emptyContainer
+            }
+          >
 
-            <Text style={styles.emptyText}>
-              Nenhum ganho neste período
+            <Text
+              style={
+                styles.emptyText
+              }
+            >
+              Nenhum ganho neste
+              período
             </Text>
 
           </View>
@@ -240,5 +402,6 @@ export default function Reports() {
       </View>
 
     </ScrollView>
+
   );
 }
