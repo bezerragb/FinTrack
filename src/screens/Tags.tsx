@@ -14,6 +14,7 @@ import { Feather } from '@expo/vector-icons';
 import { styles } from '../styles/tagStyles';
 
 import { useCategoryStore } from '../store/useCategoryStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 const COLORS = [
   '#FF6B6B',
@@ -25,14 +26,14 @@ const COLORS = [
 ];
 
 export default function Tags() {
+
   const [name, setName] = useState('');
 
   const [selectedColor, setSelectedColor] =
     useState(COLORS[0]);
 
-  const [editingId, setEditingId] = useState<
-    string | null
-  >(null);
+  const [editingId, setEditingId] =
+    useState<string | null>(null);
 
   const {
     categories,
@@ -42,23 +43,41 @@ export default function Tags() {
     updateCategory,
   } = useCategoryStore();
 
+  const user = useAuthStore(
+    (state) => state.user
+  );
+
   useEffect(() => {
-    loadCategories();
-  }, []);
+
+    if (user) {
+      loadCategories();
+    }
+
+  }, [user]);
 
   async function handleAddOrUpdate() {
-    if (!name) return;
+
+    if (!name.trim() || !user) return;
 
     if (editingId) {
-      await updateCategory(editingId, name, selectedColor);
+
+      await updateCategory(
+        editingId,
+        name,
+        selectedColor
+      );
 
       setEditingId(null);
+
     } else {
+
       await addCategory({
         id: String(Date.now()),
-        name,
+        userId: user.id,
+        name: name.trim(),
         color: selectedColor,
       });
+
     }
 
     setName('');
@@ -66,6 +85,7 @@ export default function Tags() {
   }
 
   function handleEdit(item: any) {
+
     setEditingId(item.id);
 
     setName(item.name);
@@ -74,9 +94,10 @@ export default function Tags() {
   }
 
   function handleDelete(id: string) {
+
     Alert.alert(
       'Excluir categoria',
-      'Deseja realmente excluir?',
+      'Deseja realmente excluir esta categoria?',
       [
         {
           text: 'Cancelar',
@@ -92,15 +113,18 @@ export default function Tags() {
   }
 
   return (
+
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
     >
+
       <Text style={styles.title}>
         Gerenciar Categorias
       </Text>
 
       <View style={styles.card}>
+
         <Text style={styles.cardTitle}>
           {editingId
             ? 'Editar Categoria'
@@ -118,15 +142,21 @@ export default function Tags() {
           onChangeText={setName}
         />
 
-        <Text style={styles.label}>Cor</Text>
+        <Text style={styles.label}>
+          Cor
+        </Text>
 
         <View style={styles.colorsContainer}>
+
           {COLORS.map((color) => (
+
             <TouchableOpacity
               key={color}
               style={[
                 styles.colorItem,
-                { backgroundColor: color },
+                {
+                  backgroundColor: color,
+                },
 
                 selectedColor === color &&
                   styles.selectedColor,
@@ -135,70 +165,112 @@ export default function Tags() {
                 setSelectedColor(color)
               }
             />
+
           ))}
+
         </View>
 
         <TouchableOpacity
           style={styles.addButton}
           onPress={handleAddOrUpdate}
         >
+
           <Text style={styles.addButtonText}>
             {editingId
               ? 'Salvar Alterações'
               : 'Adicionar Categoria'}
           </Text>
+
         </TouchableOpacity>
+
       </View>
 
       <Text style={styles.sectionTitle}>
         Suas Categorias
       </Text>
 
-      {categories.map((item) => (
-        <View
-          key={item.id}
-          style={styles.categoryCard}
-        >
-          <View style={styles.categoryLeft}>
-            <View
-              style={[
-                styles.categoryColor,
-                {
-                  backgroundColor: item.color,
-                },
-              ]}
-            />
+      {categories.length === 0 ? (
 
-            <Text style={styles.categoryName}>
-              {item.name}
-            </Text>
-          </View>
+        <View style={styles.categoryCard}>
 
-          <View style={styles.actions}>
-            <TouchableOpacity
-              onPress={() => handleEdit(item)}
-            >
-              <Feather
-                name="edit"
-                size={20}
-                color="#2563EB"
-              />
-            </TouchableOpacity>
+          <Text
+            style={{
+              color: '#64748B',
+              textAlign: 'center',
+            }}
+          >
+            Nenhuma categoria cadastrada.
+          </Text>
 
-            <TouchableOpacity
-              onPress={() =>
-                handleDelete(item.id)
-              }
-            >
-              <Feather
-                name="trash-2"
-                size={20}
-                color="#EF4444"
-              />
-            </TouchableOpacity>
-          </View>
         </View>
-      ))}
+
+      ) : (
+
+        categories.map((item) => (
+
+          <View
+            key={item.id}
+            style={styles.categoryCard}
+          >
+
+            <View style={styles.categoryLeft}>
+
+              <View
+                style={[
+                  styles.categoryColor,
+                  {
+                    backgroundColor:
+                      item.color,
+                  },
+                ]}
+              />
+
+              <Text
+                style={styles.categoryName}
+              >
+                {item.name}
+              </Text>
+
+            </View>
+
+            <View style={styles.actions}>
+
+              <TouchableOpacity
+                onPress={() =>
+                  handleEdit(item)
+                }
+              >
+
+                <Feather
+                  name="edit"
+                  size={20}
+                  color="#2563EB"
+                />
+
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() =>
+                  handleDelete(item.id)
+                }
+              >
+
+                <Feather
+                  name="trash-2"
+                  size={20}
+                  color="#EF4444"
+                />
+
+              </TouchableOpacity>
+
+            </View>
+
+          </View>
+
+        ))
+
+      )}
+
     </ScrollView>
   );
 }
