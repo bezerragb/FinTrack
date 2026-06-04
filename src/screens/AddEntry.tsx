@@ -16,6 +16,8 @@ import { Picker } from '@react-native-picker/picker';
 
 import { useCategoryStore } from '../store/useCategoryStore';
 
+import { useAuthStore } from '../store/useAuthStore';
+
 
 export default function AddEntry({ navigation }: any) {
 
@@ -41,6 +43,10 @@ export default function AddEntry({ navigation }: any) {
   (state) => state.loadCategories
 );
 
+  const user = useAuthStore(
+    (state) => state.user
+  );
+
   useEffect(() => {
 
   async function fetchCategories() {
@@ -62,23 +68,21 @@ export default function AddEntry({ navigation }: any) {
   async function handleAdd() {
 
     if (!amount || !title || !category) return;
-
+    
+    if (!user) return;
+    
     await addEntry({
       id: String(Date.now()),
+      userId: user.id,
       title,
       amount: Number(amount),
       type,
       category,
       date: new Date().toISOString(),
     });
-
-    setAmount('');
-    setTitle('');
-    setCategory('');
-    setType('expense');
-
+  
     navigation.goBack();
-  }
+}
 
   return (
 
