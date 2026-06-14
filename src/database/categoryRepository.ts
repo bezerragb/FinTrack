@@ -11,7 +11,7 @@ export const addCategory = (category: Category) => {
     [
       category.id,
       category.userId,
-      category.name,
+      category.name.trim(),
       category.color,
     ]
   );
@@ -53,6 +53,6 @@ export const updateCategory = (
         color = ?
       WHERE id = ?
     `,
-    [name, color, id]
+    [name.trim(), color, id]
   );
 };
