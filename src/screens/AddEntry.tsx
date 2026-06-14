@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useFinanceStore } from '../store/useFinanceStore';
 import { useCategoryStore } from '../store/useCategoryStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { currencyMask, currencyToNumber, } from '../utils/formatCurrency';
 
 import { styles } from '../styles/addEntryStyles';
 
@@ -39,7 +40,7 @@ export default function AddEntry({ navigation }: any) {
   );
 
   async function handleAdd() {
-    const normalizedAmount = Number(amount.replace(',', '.'));
+    const normalizedAmount = currencyToNumber(amount);
 
     if (
       !amount.trim() ||
@@ -107,10 +108,12 @@ export default function AddEntry({ navigation }: any) {
 
         <TextInput
           style={styles.input}
-          placeholder="0,00"
-          keyboardType="decimal-pad"
+          placeholder="R$ 0,00"
+          keyboardType="numeric"
           value={amount}
-          onChangeText={setAmount}
+          onChangeText={(value) =>
+            setAmount(currencyMask(value))
+          }
         />
 
         <Text style={styles.label}>Descrição</Text>

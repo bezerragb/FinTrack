@@ -18,6 +18,7 @@ import { styles } from '../styles/reportsStyles';
 import { useFinanceStore } from '../store/useFinanceStore';
 
 import { useCategoryStore } from '../store/useCategoryStore';
+import { formatCurrency } from '../utils/formatCurrency';
 
 export default function Reports() {
 
