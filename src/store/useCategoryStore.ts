@@ -24,23 +24,20 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
   categories: [],
 
   loadCategories: async () => {
-    const userId = useAuthStore.getState().user?.id;
+  const userId = useAuthStore.getState().user?.id;
 
-    if (!userId) {
-      set({
-        categories: [],
-      });
+  if (!userId) {
+    set({ categories: [] });
+    return;
+  }
 
-      return;
-    }
+  const categories = getCategoriesByUser(userId);
 
-    const categories = 
-      getCategoriesByUser(userId);
+  console.log('USER ID LOAD:', userId);
+  console.log('CATEGORIES LOAD:', categories);
 
-    set({
-      categories,
-    });
-  },
+  set({ categories });
+},
 
   addCategory: async (category) => {
     addCategoryDB(category);
@@ -50,6 +47,8 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     set({
       categories,
     });
+
+    console.log('CATEGORY ADD:', category);
   },
 
   deleteCategory: async (id) => {
