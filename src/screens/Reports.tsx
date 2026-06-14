@@ -142,60 +142,58 @@ export default function Reports() {
     );
 
   const groupedExpenses = categories
-    .map((category) => {
+  .map((category) => {
+    const total = expenseEntries
+      .filter(
+        (entry) =>
+          entry.category.trim() ===
+          category.name.trim()
+      )
+      .reduce(
+        (sum, entry) =>
+          sum + entry.amount,
+        0
+      );
 
-      const total = expenseEntries
-        .filter(
-          (entry) =>
-            entry.category ===
-            category.name
-        )
-        .reduce(
-          (sum, entry) =>
-            sum + entry.amount,
-          0
-        );
-
-      return {
-        name: category.name,
-        population: total,
-        color: category.color,
-        legendFontColor: '#334155',
-        legendFontSize: 12,
-      };
-    })
-    .filter(
-      (item) =>
-        item.population > 0
-    );
+    return {
+      name: category.name.trim(),
+      population: total,
+      color: category.color,
+      legendFontColor: '#334155',
+      legendFontSize: 12,
+    };
+  })
+  .filter(
+    (item) =>
+      item.population > 0
+  );
 
   const groupedIncomes = categories
-    .map((category) => {
+  .map((category) => {
+    const total = incomeEntries
+      .filter(
+        (entry) =>
+          entry.category.trim() ===
+          category.name.trim()
+      )
+      .reduce(
+        (sum, entry) =>
+          sum + entry.amount,
+        0
+      );
 
-      const total = incomeEntries
-        .filter(
-          (entry) =>
-            entry.category ===
-            category.name
-        )
-        .reduce(
-          (sum, entry) =>
-            sum + entry.amount,
-          0
-        );
-
-      return {
-        name: category.name,
-        population: total,
-        color: category.color,
-        legendFontColor: '#334155',
-        legendFontSize: 12,
-      };
-    })
-    .filter(
-      (item) =>
-        item.population > 0
-    );
+    return {
+      name: category.name.trim(),
+      population: total,
+      color: category.color,
+      legendFontColor: '#334155',
+      legendFontSize: 12,
+    };
+  })
+  .filter(
+    (item) =>
+      item.population > 0
+  );
 
   const periodLabel =
     viewMode === 'monthly'
@@ -209,6 +207,20 @@ export default function Reports() {
       : String(
           selectedDate.getFullYear()
         );
+
+        console.log('ENTRIES:', entries);
+
+console.log('FILTERED ENTRIES:', filteredEntries);
+
+console.log('CATEGORIES:', categories);
+
+console.log('EXPENSE ENTRIES:', expenseEntries);
+
+console.log('INCOME ENTRIES:', incomeEntries);
+
+console.log('GROUPED EXPENSES:', groupedExpenses);
+
+console.log('GROUPED INCOMES:', groupedIncomes);
 
   return (
 
